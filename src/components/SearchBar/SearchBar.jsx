@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Formik, Field } from 'formik';
+import { Formik } from 'formik';
 import {
   Header,
   Form,
@@ -9,53 +9,39 @@ import {
   SearchButtonLabel,
   Input,
 } from './SearchBar.styled';
-import { Component } from 'react';
+import { useState } from 'react';
 
-export class SearchBar extends Component {
-  state = {
-    searchQuery: '',
+export const SearchBar = props => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleChange = event => {
+    setSearchQuery(event.currentTarget.value.toLowerCase());
   };
 
-  handleChange = event => {
-    this.setState({
-      searchQuery: event.currentTarget.value.toLowerCase().trim(),
-    });
-  };
-
-  handleSubmit = () => {
-    if (this.state.searchQuery.trim() === '') {
+  const handleSubmit = () => {
+    if (searchQuery.trim() === '') {
       toast.error('Please enter the word');
       return;
     }
-    this.props.onSubmit(this.state.searchQuery);
+    props.onSubmit(searchQuery);
   };
-
-  CustomInputComponent = props => (
-    <Input
-      type="text"
-      name="searchQuery"
-      placeholder="Search images and photos"
-      onChange={this.handleChange}
-    />
+  return (
+    <Header>
+      <Formik initialValues={searchQuery} onSubmit={handleSubmit}>
+        <Form>
+          <FormField>
+            <Input
+              type="text"
+              name="searchQuery"
+              placeholder="Search images and photos"
+              onChange={handleChange}
+            />
+          </FormField>
+          <SearchButton type="submit">
+            <SearchButtonLabel>Search</SearchButtonLabel>
+          </SearchButton>
+        </Form>
+      </Formik>
+    </Header>
   );
-
-  render() {
-    return (
-      <Header>
-        <Formik
-          initialValues={{ searchQuery: '' }}
-          onSubmit={this.handleSubmit}
-        >
-          <Form>
-            <FormField>
-              <Field as={this.CustomInputComponent} />
-            </FormField>
-            <SearchButton type="submit">
-              <SearchButtonLabel>Search</SearchButtonLabel>
-            </SearchButton>
-          </Form>
-        </Formik>
-      </Header>
-    );
-  }
-}
+};
