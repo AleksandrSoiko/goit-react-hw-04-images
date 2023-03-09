@@ -5,24 +5,20 @@ import { useEffect } from 'react';
 
 const modalRoot = document.querySelector('#modal-root');
 
+function handlePressEsc(event) {
+  if (event.code === 'Escape') {
+    props.onClose();
+  }
+}
+
 export const ModalWindow = props => {
   useEffect(() => {
-    function handlePressEsc(event) {
-      if (event.code === 'Escape') {
-        props.onClose();
-      }
-    }
     window.addEventListener('keydown', handlePressEsc);
     return () => {
       window.removeEventListener('keydown', handlePressEsc);
     };
+    // eslint-disable-next-line
   }, []);
-
-  // function handlePressEsc(event) {
-  //   if (event.code === 'Escape') {
-  //     props.onClose();
-  //   }
-  // }
 
   function handleClickBackdrop(event) {
     if (event.target === event.currentTarget) {
