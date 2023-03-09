@@ -55,6 +55,7 @@ export class App extends Component {
       }
     }
   }
+  //test
 
   handleSubmitForm = searchQuery => {
     if (this.state.searchQuery === searchQuery) {
