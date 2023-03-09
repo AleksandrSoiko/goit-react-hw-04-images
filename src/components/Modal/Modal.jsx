@@ -7,17 +7,22 @@ const modalRoot = document.querySelector('#modal-root');
 
 export const ModalWindow = props => {
   useEffect(() => {
+    function handlePressEsc(event) {
+      if (event.code === 'Escape') {
+        props.onClose();
+      }
+    }
     window.addEventListener('keydown', handlePressEsc);
     return () => {
       window.removeEventListener('keydown', handlePressEsc);
     };
   }, []);
 
-  function handlePressEsc(event) {
-    if (event.code === 'Escape') {
-      props.onClose();
-    }
-  }
+  // function handlePressEsc(event) {
+  //   if (event.code === 'Escape') {
+  //     props.onClose();
+  //   }
+  // }
 
   function handleClickBackdrop(event) {
     if (event.target === event.currentTarget) {
