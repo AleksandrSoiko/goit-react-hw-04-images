@@ -5,12 +5,6 @@ import { useEffect } from 'react';
 
 const modalRoot = document.querySelector('#modal-root');
 
-function handlePressEsc(event) {
-  if (event.code === 'Escape') {
-    props.onClose();
-  }
-}
-
 export const ModalWindow = props => {
   useEffect(() => {
     window.addEventListener('keydown', handlePressEsc);
@@ -19,6 +13,12 @@ export const ModalWindow = props => {
     };
     // eslint-disable-next-line
   }, []);
+
+  function handlePressEsc(event) {
+    if (event.code === 'Escape') {
+      props.onClose();
+    }
+  }
 
   function handleClickBackdrop(event) {
     if (event.target === event.currentTarget) {
