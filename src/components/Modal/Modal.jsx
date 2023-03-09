@@ -11,7 +11,7 @@ export const ModalWindow = props => {
     return () => {
       window.removeEventListener('keydown', handlePressEsc);
     };
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handlePressEsc(event) {
