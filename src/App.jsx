@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Container } from './App.styled';
 import { SearchBar } from 'components/SearchBar/SearchBar';
 import { ToastContainer, toast } from 'react-toastify';
@@ -13,112 +13,110 @@ import axios from 'axios';
 
 axios.defaults.baseURL = 'https://pixabay.com/api/';
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    page: 1,
-    images: [],
-    selectedImage: null,
-    alt: null,
-    status: 'idle',
-    error: null,
-  };
-  totalHits = null;
+export const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [alt, setAlt] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState(null);
 
-  async componentDidUpdate(_, prevState) {
-    const { page, searchQuery } = this.state;
-    if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
-      this.setState({ status: 'pending' });
+  const prevSearchQuerryRef = useRef();
+  const prevPageRef = useRef();
 
-      try {
-        const imageData = await fetchAPI(searchQuery, page);
-        this.totalHits = imageData.total;
-        const imagesHits = imageData.hits;
-        if (!imagesHits.length) {
-          toast.warning('No results', { position: 'top-center' });
-        }
-        this.setState(({ images }) => ({
-          images: [...images, ...imagesHits],
-          status: 'resolved',
-        }));
+  let totalHits = null;
 
-        if (page > 1) {
-          const CARD_HEIGHT = 300;
-          window.scrollBy({
-            top: CARD_HEIGHT * 2,
-            behavior: 'smooth',
-          });
-        }
-      } catch (error) {
-        toast.error(`Sorry something went wrong. ${error.message}`);
-        this.setState({ status: 'rejected' });
-      }
+  const fetchImage = async () => {
+    if (
+      prevPageRef.current !== page ||
+      prevSearchQuerryRef.current !== searchQuery
+    ) {
+      setStatus('pending');
     }
-  }
-  //test
+    try {
+      const imageData = await fetchAPI(searchQuery, page);
+      totalHits = imageData.total;
+      const imagesHits = imageData.hits;
+      if (!imagesHits.length) {
+        toast.warning('No results', { position: 'top-center' });
+      }
+      setImages(prevImages => [...prevImages, ...imagesHits]);
+      setStatus('resolved');
 
-  handleSubmitForm = searchQuery => {
-    if (this.state.searchQuery === searchQuery) {
+      if (page > 1) {
+        const CARD_HEIGHT = 300;
+        window.scrollBy({
+          top: CARD_HEIGHT * 2,
+          behavior: 'smooth',
+        });
+      }
+    } catch (error) {
+      toast.error(`Sorry something went wrong. ${error.message}`);
+      setStatus('rejected');
+    }
+  };
+
+  useEffect(() => {
+    if (searchQuery !== '') {
+      fetchImage();
+      prevPageRef.current = page;
+      prevSearchQuerryRef.current = searchQuery;
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, searchQuery]);
+
+  const resetState = () => {
+    setSearchQuery('');
+    setPage(1);
+    setImages([]);
+    setSelectedImage(null);
+    setAlt(null);
+    setStatus('idle');
+  };
+
+  const handleSubmitForm = searchQuery => {
+    // console.log(searchQuery);
+    if (prevSearchQuerryRef.current === searchQuery) {
       return;
     }
-    this.resetState();
-    this.setState({ searchQuery });
+    resetState();
+    setSearchQuery(searchQuery);
   };
 
-  onSelectedImg = (largeImageUrl, tags) => {
-    this.setState({
-      selectedImage: largeImageUrl,
-      alt: tags,
-    });
+  const onSelectedImg = (largeImageUrl, tags) => {
+    setSelectedImage(largeImageUrl);
+    setAlt(tags);
   };
 
-  incrementPage = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const incrementPage = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  closeModal = () => {
-    this.setState({ selectedImage: null });
+  const closeModal = () => {
+    setSelectedImage(null);
   };
 
-  resetState = () => {
-    this.setState({
-      searchQuery: '',
-      page: 1,
-      images: [],
-      selectedImage: null,
-      alt: null,
-      status: 'idle',
-    });
-  };
-
-  render() {
-    const { images, status, selectedImage, alt, error } = this.state;
-
-    return (
-      <Container>
-        <SearchBar onSubmit={this.handleSubmitForm} />
-        <ToastContainer autoClose={3000} theme="colored" pauseOnHover />
-        {status === 'pending' && <Spinner />}
-        {error && <ErrorText message={error.message} />}
-        {images.length > 0 && (
-          <ImageGalleryList
-            images={images}
-            selectedImage={this.onSelectedImg}
-          />
-        )}
-        {images.length > 0 && images.length !== this.totalHits && (
-          <LoadMoreButton onClick={this.incrementPage} />
-        )}
-        {selectedImage !== null && (
-          <ModalWindow
-            selectedImage={selectedImage}
-            tags={alt}
-            onClose={this.closeModal}
-          />
-        )}
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <SearchBar onSubmit={handleSubmitForm} />
+      <ToastContainer autoClose={3000} theme="colored" pauseOnHover />
+      {status === 'pending' && <Spinner />}
+      {error && <ErrorText message={error.message} />}
+      {images.length > 0 && (
+        <ImageGalleryList images={images} selectedImage={onSelectedImg} />
+      )}
+      {images.length > 0 && images.length !== totalHits && (
+        <LoadMoreButton onClick={incrementPage} />
+      )}
+      {selectedImage !== null && (
+        <ModalWindow
+          selectedImage={selectedImage}
+          tags={alt}
+          onClose={closeModal}
+        />
+      )}
+    </Container>
+  );
+};

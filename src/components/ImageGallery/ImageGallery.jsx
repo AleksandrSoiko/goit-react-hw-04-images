@@ -5,10 +5,10 @@ import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 export const ImageGalleryList = ({ images, selectedImage }) => {
   return (
     <ImageGallery>
-      {images.map(({ id, webformatURL, tags, largeImageURL }) => {
+      {images.map(({ webformatURL, tags, largeImageURL }) => {
         return (
           <ImageGalleryItem
-            key={id}
+            key={largeImageURL}
             preview={webformatURL}
             tags={tags}
             selectedImage={() => selectedImage(largeImageURL, tags)}
