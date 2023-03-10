@@ -20,6 +20,7 @@ export const App = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [alt, setAlt] = useState(null);
   const [status, setStatus] = useState('idle');
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
 
   const prevSearchQuerryRef = useRef();
